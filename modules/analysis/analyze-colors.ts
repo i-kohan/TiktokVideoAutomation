@@ -2,14 +2,22 @@ import ffmpeg from "fluent-ffmpeg";
 import ffmpegPath from "ffmpeg-static";
 import ffprobePath from "ffprobe-static";
 import getColors from "get-image-colors";
+import path from "path";
 
 ffmpeg.setFfmpegPath(ffmpegPath as string);
 ffmpeg.setFfprobePath(ffprobePath.path);
 
 const extractFrame = (videoPath: string, outputPath: string, time: string) =>
   new Promise((resolve, reject) => {
-    (ffmpeg as any)(videoPath)
-      .screenshots({ timestamps: [time], filename: outputPath })
+    const outputDir = path.dirname(outputPath);
+    const outputFilename = path.basename(outputPath);
+
+    ffmpeg(videoPath)
+      .screenshots({
+        timestamps: [time],
+        filename: outputFilename,
+        folder: outputDir,
+      })
       .on("end", () => resolve(outputPath))
       .on("error", reject);
   });

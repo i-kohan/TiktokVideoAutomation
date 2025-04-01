@@ -6,7 +6,11 @@ ffmpeg.setFfmpegPath(ffmpegPath as string);
 ffmpeg.setFfprobePath(ffprobePath.path);
 
 // Склейка заранее подготовленных видео
-export async function concatVideos(videoPaths: string[], output = "final.mp4") {
+export async function concatVideos(
+  videoPaths: string[],
+  output = "final.mp4",
+  outputDir: string
+) {
   return new Promise((resolve, reject) => {
     const merged = ffmpeg();
 
@@ -18,6 +22,6 @@ export async function concatVideos(videoPaths: string[], output = "final.mp4") {
         console.log(`Видео успешно объединены в ${output}`);
         resolve(output);
       })
-      .mergeToFile(output, "./temp");
+      .mergeToFile(output, outputDir);
   });
 }

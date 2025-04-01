@@ -5,7 +5,11 @@
   "type": "commonjs",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "fetch-videos": "ts-node scripts/fetch-videos.ts",
+    "cluster-videos": "ts-node scripts/cluster-videos.ts",
+    "montage": "ts-node scripts/montage.ts",
+    "reanalyze": "ts-node scripts/reanalyze.ts"
   },
   "author": "",
   "license": "ISC",
