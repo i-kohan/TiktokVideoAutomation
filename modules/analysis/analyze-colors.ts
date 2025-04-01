@@ -3,27 +3,27 @@ import ffmpegPath from "ffmpeg-static";
 import ffprobePath from "ffprobe-static";
 import getColors from "get-image-colors";
 
-ffmpeg.setFfmpegPath(ffmpegPath);
+ffmpeg.setFfmpegPath(ffmpegPath as string);
 ffmpeg.setFfprobePath(ffprobePath.path);
 
-const extractFrame = (videoPath, outputPath, time) =>
+const extractFrame = (videoPath: string, outputPath: string, time: string) =>
   new Promise((resolve, reject) => {
-    ffmpeg(videoPath)
+    (ffmpeg as any)(videoPath)
       .screenshots({ timestamps: [time], filename: outputPath })
       .on("end", () => resolve(outputPath))
       .on("error", reject);
   });
 
-const analyzeFrame = async (framePath) => {
+const analyzeFrame = async (framePath: string) => {
   const colors = await getColors(framePath);
   const dominantColor = colors[0].rgb();
   const brightness = dominantColor.reduce((a, b) => a + b) / 3;
   return { dominantColor, brightness };
 };
 
-export const analyzeVideoDeep = async (videoPath) => {
+export async function analyzeColors(videoPath: string) {
   const timestamps = ["10%", "50%", "90%"]; // берём кадры с начала, середины и конца
-  const analyses = [];
+  const analyses: { dominantColor: number[]; brightness: number }[] = [];
 
   for (let i = 0; i < timestamps.length; i++) {
     const framePath = `${videoPath}_frame_${i}.jpg`;
@@ -48,4 +48,4 @@ export const analyzeVideoDeep = async (videoPath) => {
     dominantColor: avgColor,
     framesAnalyzed: analyses.length,
   };
-};
+}

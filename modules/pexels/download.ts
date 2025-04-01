@@ -1,32 +1,11 @@
 import axios from "axios";
 import fs from "fs";
 import path from "path";
-import { createClient } from "pexels";
 
-import dotenv from "dotenv";
+import { VIDEOS_DIR } from "../data/constants";
 
-dotenv.config();
-
-const client = createClient(process.env.PEXELS_API_KEY);
-
-export async function searchVideos(
-  query,
-  perPage = 1,
-  page = 1,
-  orientation = "portrait"
-) {
-  const result = await client.videos.search({
-    query,
-    per_page: perPage,
-    orientation,
-    page,
-  });
-
-  return result;
-}
-
-export async function downloadVideo(url, outputFolder = "videos") {
-  const filename = url.split("/").pop().split("?")[0] + ".mp4";
+export async function downloadVideo(url: string, outputFolder = VIDEOS_DIR) {
+  const filename = url.split("/").pop()?.split("?")[0] + ".mp4";
   const filePath = path.join(outputFolder, filename);
 
   if (!fs.existsSync(outputFolder)) {
@@ -42,7 +21,7 @@ export async function downloadVideo(url, outputFolder = "videos") {
   const writer = fs.createWriteStream(filePath);
   response.data.pipe(writer);
 
-  return new Promise((resolve, reject) => {
+  return new Promise<string>((resolve, reject) => {
     writer.on("finish", () => {
       console.log(`Скачано новое видео: ${filePath}`);
       resolve(filePath);
