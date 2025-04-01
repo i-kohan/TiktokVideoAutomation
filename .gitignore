@@ -1,7 +1,18 @@
 node_modules
 .env
-temp/
-videos/
+temp
+videos
 final.mp4
-data/*
-old/*
+data
+old
+
+# TypeScript build outputs
+dist
+*.tsbuildinfo
+
+# IDE and OS files
+.DS_Store
+.idea/
+.vscode/
+*.swp
+*.swo

@@ -1,10 +1,8 @@
-import { analyzeColors } from "../modules/analysis";
-import {
-  loadVideosJson,
-  saveVideosJson,
-  type VideoData,
-} from "../modules/data";
-import { downloadVideo, searchVideos } from "../modules/pexels";
+import { analyzeColors } from "../modules/analysis/analyze-colors";
+import { VideoData } from "../modules/data/types";
+import { loadVideosJson, saveVideosJson } from "../modules/data/videos";
+import { downloadVideo } from "../modules/pexels/download";
+import { searchVideos } from "../modules/pexels/search";
 
 const query = "forest fog esthetic";
 const videosCount = 10;

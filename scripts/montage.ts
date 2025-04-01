@@ -1,5 +1,7 @@
-import { loadClustersJson } from "../modules/data";
-import { trimVideo, concatVideos, convertVideo } from "../modules/montage";
+import { loadClustersJson } from "../modules/data/clusters";
+import { concatVideos } from "../modules/montage/concat-videos";
+import { convertVideo } from "../modules/montage/convert-video";
+import { trimVideo } from "../modules/montage/trim-video";
 
 async function main() {
   const clusters = loadClustersJson().portrait;

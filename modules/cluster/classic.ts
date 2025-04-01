@@ -1,4 +1,4 @@
-import { ClustersData, VideoData } from "../data";
+import { ClustersData, VideoData } from "../data/types";
 
 // Функция расчета дистанции
 function calculateDistance(a: VideoData, b: VideoData) {

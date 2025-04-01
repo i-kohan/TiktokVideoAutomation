@@ -1,5 +1,5 @@
-import { loadVideosJson, saveVideosJson } from "../modules/data";
-import { analyzeColors } from "../modules/analysis";
+import { analyzeColors } from "../modules/analysis/analyze-colors";
+import { loadVideosJson, saveVideosJson } from "../modules/data/videos";
 
 async function main() {
   const videos = loadVideosJson();

@@ -1,5 +1,6 @@
 import { clusterByOrientation } from "../modules/cluster/classic";
-import { loadVideosJson, saveClustersJson } from "../modules/data";
+import { loadVideosJson } from "../modules/data/videos";
+import { saveClustersJson } from "../modules/data/clusters";
 
 async function main() {
   const videos = loadVideosJson();
