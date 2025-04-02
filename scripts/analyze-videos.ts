@@ -1,15 +1,23 @@
 import { analyzeColors } from "../modules/analysis/analyze-colors";
-import { AnalysisData, VideoAnalysis } from "../modules/data/types";
-import { loadVideosJson, saveAnalysisJson } from "../modules/data/videos";
+import { VideoData, VideoAnalysis } from "../modules/data/types";
+import {
+  loadVideosJson,
+  loadAnalysisJson,
+  saveAnalysisJson,
+} from "../modules/data/videos";
 
 async function main() {
   const videos = loadVideosJson();
+  const analysisData = loadAnalysisJson();
+  const analyzedIds = new Set(Object.keys(analysisData).map(Number));
 
-  console.log(`Анализируем ${videos.length} видео...`);
+  const notAnalyzedVideos = videos.filter(
+    (video) => !analyzedIds.has(video.id)
+  );
 
-  const analysisData: AnalysisData = {};
+  console.log(`Анализируем ${notAnalyzedVideos.length} видео...`);
 
-  for (const video of videos) {
+  for (const video of notAnalyzedVideos) {
     console.log(`Анализ видео: ${video.id}`);
 
     // Get preview images from video
@@ -20,6 +28,7 @@ async function main() {
 
     try {
       const imageUrls = video.video_pictures.map((pic) => pic.picture);
+
       const analysis = await analyzeColors(imageUrls);
 
       const videoAnalysis: VideoAnalysis = {

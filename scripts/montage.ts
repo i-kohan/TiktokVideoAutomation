@@ -9,7 +9,8 @@ import {
 import { concatVideos } from "../modules/montage/concat-videos";
 import { convertVideo } from "../modules/montage/convert-video";
 import { trimVideo } from "../modules/montage/trim-video";
-import { VideoData } from "../modules/data/types";
+import { downloadVideo } from "../modules/pexels/download";
+import { loadVideosJson } from "../modules/data/videos";
 
 interface ProcessingPaths {
   trimmed: string[];
@@ -31,21 +32,60 @@ async function setupDirectories(): Promise<void> {
   ]);
 }
 
-function selectBestClusterVideos(limit: number = 5): VideoData[] {
+function selectBestClustersVideos(
+  limit: number = 5,
+  numClusters: number = 2
+): number[][] {
   const clusters = loadClustersJson().portrait;
-  clusters.sort((a, b) => b.length - a.length);
-  return clusters[0].slice(0, limit);
+
+  if (clusters.length === 0) {
+    throw new Error("No clusters found for portrait videos");
+  }
+
+  if (clusters.length < numClusters) {
+    console.warn(
+      `⚠️ Запрошено ${numClusters} кластеров, но найдено только ${clusters.length}`
+    );
+    numClusters = clusters.length;
+  }
+
+  // Выбираем лучшие кластеры (с наименьшим качеством)
+  const bestClusters = clusters.slice(0, numClusters);
+
+  return bestClusters.map((cluster, index) => {
+    console.log(
+      `🎯 Выбран кластер ${index + 1} с качеством: ${cluster.quality}`
+    );
+    return cluster.videoIds.slice(0, limit);
+  });
 }
 
-async function processTrimming(videos: VideoData[]): Promise<string[]> {
+async function processTrimming(videoIds: number[]): Promise<string[]> {
   const trimmedVideos: string[] = [];
+  const videos = loadVideosJson();
+  const videoMap = new Map(videos.map((v) => [v.id, v]));
 
-  for (let i = 0; i < videos.length; i++) {
-    const input = videos[i].filePath;
-    const trimmedPath = path.join(TEMP_TRIMMED_DIR, `trimmed_${i}.mp4`);
+  for (let i = 0; i < videoIds.length; i++) {
+    const videoId = videoIds[i];
+    const video = videoMap.get(videoId);
 
-    console.log(`✂️ Обрезка видео до 5 секунд: ${input}`);
-    await trimVideo(input, trimmedPath);
+    if (!video) {
+      console.error(`❌ Видео не найдено: ${videoId}`);
+      continue;
+    }
+
+    // Get highest quality video file
+    const highestQualityFile = video.video_files.reduce((a, b) =>
+      a.width && b.width ? (a.width > b.width ? a : b) : a
+    );
+
+    const trimmedPath = path.join(TEMP_TRIMMED_DIR, `trimmed_${videoId}.mp4`);
+
+    console.log(`📥 Скачивание видео: ${videoId}`);
+    const filePath = await downloadVideo(highestQualityFile.link);
+
+    console.log(`✂️ Обрезка видео до 5 секунд: ${filePath}`);
+    await trimVideo(filePath, trimmedPath);
     trimmedVideos.push(trimmedPath);
   }
 
@@ -57,7 +97,10 @@ async function processConversion(trimmedPaths: string[]): Promise<string[]> {
 
   for (let i = 0; i < trimmedPaths.length; i++) {
     const input = trimmedPaths[i];
-    const output = path.join(TEMP_CONVERTED_DIR, `converted_${i}.mp4`);
+    const output = path.join(
+      TEMP_CONVERTED_DIR,
+      `converted_${path.basename(input)}`
+    );
 
     console.log(`🔄 Конвертация видео ${input}...`);
     await convertVideo(input, output);
@@ -67,36 +110,57 @@ async function processConversion(trimmedPaths: string[]): Promise<string[]> {
   return convertedVideos;
 }
 
-async function createMontage(paths: ProcessingPaths): Promise<void> {
-  console.log("🎬 Создание финального монтажа...");
-  await concatVideos(paths.converted, paths.final, path.dirname(paths.final));
-  console.log("✅ Монтаж успешно завершен!");
+async function createMontage(
+  paths: ProcessingPaths,
+  index: number
+): Promise<void> {
+  console.log(`🎬 Создание монтажа ${index + 1}...`);
+  const outputPath = path.join(MONTAGE_OUTPUT_DIR, `final_${index + 1}.mp4`);
+  await concatVideos(paths.converted, outputPath, path.dirname(outputPath));
+  console.log(`✅ Монтаж ${index + 1} успешно завершен!`);
 }
 
-async function main() {
-  // Подготовка директорий
-  await setupDirectories();
+async function processCluster(
+  videoIds: number[],
+  index: number
+): Promise<void> {
+  console.log(`\n🔄 Обработка кластера ${index + 1}...`);
+  console.log("📋 ID видео для обработки:", videoIds);
 
-  // Выбор лучших видео из кластера
-  const selectedVideos = selectBestClusterVideos();
-  console.log(
-    "📋 Видео для обработки и склейки:",
-    selectedVideos.map((v) => v.filePath)
-  );
+  if (videoIds.length === 0) {
+    throw new Error(`No videos selected for montage ${index + 1}`);
+  }
 
   // Пути для обработки видео
   const paths: ProcessingPaths = {
-    trimmed: await processTrimming(selectedVideos),
+    trimmed: await processTrimming(videoIds),
     converted: [],
-    final: path.join(MONTAGE_OUTPUT_DIR, "final.mp4"),
+    final: path.join(MONTAGE_OUTPUT_DIR, `final_${index + 1}.mp4`),
   };
 
   // Конвертация и монтаж
   paths.converted = await processConversion(paths.trimmed);
-  await createMontage(paths);
+  await createMontage(paths, index);
 }
 
-main().catch((error) => {
-  console.error("❌ Произошла ошибка:", error);
-  process.exit(1);
-});
+async function main() {
+  try {
+    // Подготовка директорий
+    await setupDirectories();
+
+    // Выбор видео из лучших кластеров
+    const selectedVideoIds = selectBestClustersVideos();
+
+    // Обработка каждого кластера
+    for (let i = 0; i < selectedVideoIds.length; i++) {
+      await processCluster(selectedVideoIds[i], i);
+    }
+
+    console.log("\n✨ Все монтажи успешно созданы!");
+  } catch (error) {
+    console.error("❌ Произошла ошибка:", error);
+    process.exit(1);
+  }
+}
+
+main();

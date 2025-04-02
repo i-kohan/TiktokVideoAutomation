@@ -7,6 +7,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "fetch-videos": "ts-node scripts/fetch-videos.ts",
+    "analyze-videos": "ts-node scripts/analyze-videos.ts",
     "cluster-videos": "ts-node scripts/cluster-videos.ts",
     "montage": "ts-node scripts/montage.ts",
     "reanalyze": "ts-node scripts/reanalyze.ts"
@@ -20,13 +21,12 @@
     "ffmpeg-static": "^5.2.0",
     "ffprobe-static": "^3.1.0",
     "fluent-ffmpeg": "^2.1.3",
-    "get-image-colors": "^4.0.1",
-    "pexels": "^1.4.0"
+    "pexels": "^1.4.0",
+    "sharp": "^0.33.5"
   },
   "devDependencies": {
     "@types/ffprobe-static": "^2.0.3",
     "@types/fluent-ffmpeg": "^2.1.27",
-    "@types/get-image-colors": "^4.0.5",
     "@types/node": "^22.13.16",
     "ts-node": "^10.9.2",
     "typescript": "^5.8.2"

@@ -1,12 +1,12 @@
 import { clusterByOrientation } from "../modules/cluster/classic";
-import { loadVideosJson } from "../modules/data/videos";
+import { loadAnalysisJson, loadVideosJson } from "../modules/data/videos";
 import { saveClustersJson } from "../modules/data/clusters";
 
 async function main() {
   const videos = loadVideosJson();
+  const analysisData = loadAnalysisJson();
 
-  const threshold = 30; // Подбери порог, как обсуждали ранее
-  const clustered = clusterByOrientation(videos, threshold);
+  const clustered = clusterByOrientation(videos, analysisData);
 
   saveClustersJson(clustered);
 
