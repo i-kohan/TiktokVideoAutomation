@@ -1,0 +1,32 @@
+version: "3.8"
+
+services:
+  clip-service:
+    build: .
+    ports:
+      - "5000:5000"
+    volumes:
+      # Mount model cache directory
+      - ./models:/app/models
+      # Mount source code for live development
+      - ./clip_service.py:/app/clip_service.py
+      - ./test_clip_service.py:/app/test_clip_service.py
+    environment:
+      - PORT=5000
+      - HOST=0.0.0.0
+      # Set to "true" to enable Flask debug mode for auto-reloading
+      - DEBUG=true
+      # CLIP model to use (ViT-B/32, ViT-B/16, RN50, etc.)
+      - MODEL_NAME=ViT-B/32
+      # Directory where models are cached
+      - MODEL_CACHE_DIR=/app/models
+      # Uncomment the line below to run on CPU instead of GPU
+      # - CUDA_VISIBLE_DEVICES=""
+    # If using GPU, uncomment the line below
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: 1
+    #           capabilities: [gpu]

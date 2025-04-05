@@ -2,8 +2,8 @@ import { VideoData } from "../modules/data/types";
 import { loadVideosJson, saveVideosJson } from "../modules/data/videos";
 import { searchVideos } from "../modules/pexels/search";
 
-const query = "forest fog esthetic";
-const videosCount = 10;
+const query = "forest fog sun";
+const videosCount = 80;
 const page = 1;
 
 async function main() {
@@ -21,6 +21,8 @@ async function main() {
     return;
   }
 
+  console.log(`Найдено ${searchResult.videos.length} видео`);
+
   for (const video of searchResult.videos) {
     if (existingIds.includes(video.id)) {
       console.log(`Видео уже добавлено: ${video.id}`);
@@ -33,7 +35,7 @@ async function main() {
     };
 
     existingVideos.push(videoData);
-    console.log("Видео добавлено в JSON:", videoData);
+    console.log("Видео добавлено в JSON:", videoData.id);
   }
 
   saveVideosJson(existingVideos);

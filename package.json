@@ -5,12 +5,15 @@
   "type": "commonjs",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "fetch-videos": "ts-node scripts/fetch-videos.ts",
     "analyze-videos": "ts-node scripts/analyze-videos.ts",
     "cluster-videos": "ts-node scripts/cluster-videos.ts",
+    "generate-embeddings": "ts-node scripts/generate-embeddings.ts",
     "montage": "ts-node scripts/montage.ts",
-    "reanalyze": "ts-node scripts/reanalyze.ts"
+    "reanalyze": "ts-node scripts/reanalyze.ts",
+    "test": "ts-node scripts/test.ts",
+    "create-search-cluster": "ts-node scripts/create-search-cluster.ts",
+    "montage-cluster": "ts-node scripts/montage-cluster.ts"
   },
   "author": "",
   "license": "ISC",
