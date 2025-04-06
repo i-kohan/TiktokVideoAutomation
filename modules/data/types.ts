@@ -7,8 +7,8 @@ export interface VideoData extends PexelsVideo {
 
 // Analysis data for a single video
 export interface VideoAnalysis {
-  brightness: number;
-  dominantColor: [number, number, number];
+  brightness?: number;
+  dominantColor?: [number, number, number];
   embedding?: number[]; // CLIP embedding vector
   hasHuman?: boolean; // Whether humans were detected
 }

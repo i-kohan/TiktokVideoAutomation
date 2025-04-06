@@ -1,6 +1,104 @@
-# TikTok Automation with Semantic Analysis
+# TikTok Video Automation
 
-A project for creating TikTok-style montages based on semantic similarity in video atmosphere, mood, and content.
+This project provides tools for creating TikTok-ready video montages by:
+
+1. Fetching videos from Pexels API
+2. Analyzing videos for semantic content and visual properties
+3. Clustering similar videos together
+4. Creating montages from the best clusters
+
+## Setup
+
+1. Install dependencies:
+
+```bash
+npm install
+```
+
+2. Run the Python CLIP service:
+
+```bash
+cd python-clip-service
+pip install -r requirements.txt
+python clip_service.py
+```
+
+## Usage
+
+### 1. Fetch videos
+
+```bash
+npx ts-node scripts/fetch-videos.ts
+```
+
+Searches for videos matching a query and saves them to your local database.
+
+### 2. Generate embeddings
+
+```bash
+npx ts-node scripts/generate-embeddings.ts
+```
+
+Creates CLIP embeddings for all fetched videos, which enable semantic searching.
+
+### 3. Analyze video colors
+
+```bash
+npx ts-node scripts/analyze-videos.ts
+```
+
+Extracts color information (dominant color and brightness) from all videos.
+
+### 4. Create video clusters
+
+You have two options:
+
+#### Option A: Basic clustering
+
+```bash
+npx ts-node scripts/create-search-cluster.ts "forest fog" portrait 5 "Foggy Forest"
+```
+
+Arguments:
+
+- Search query: What to search for
+- Orientation: "portrait" or "landscape"
+- Max videos: Maximum number of videos in the cluster
+- Cluster name: Name for the cluster
+
+#### Option B: Enhanced clustering (recommended)
+
+```bash
+npx ts-node scripts/enhanced-search-cluster.ts "forest fog" "misty woods,morning fog" portrait 5 "Foggy Forest" 0.8
+```
+
+Arguments:
+
+- Primary query: Main search term
+- Related prompts: Comma-separated list of related terms (no spaces between terms)
+- Orientation: "portrait" or "landscape"
+- Max videos: Maximum number of videos in the cluster
+- Cluster name: Name for the cluster
+- Minimum similarity: Threshold for including videos (0.0-1.0, higher is more strict)
+
+The enhanced clustering provides better results by:
+
+- Using multiple related prompts to find videos that match a more specific concept
+- Filtering by minimum similarity threshold to ensure strong matches
+- Matching videos by color and brightness for visual coherence
+
+### 5. Create a montage
+
+```bash
+npx ts-node scripts/montage-cluster.ts 0 portrait
+```
+
+Arguments:
+
+- Cluster index: The index of the cluster to use
+- Orientation: "portrait" or "landscape"
+
+This will download, trim, convert and combine the videos in the specified cluster into a montage suitable for TikTok.
 
 ## Project Structure
 
@@ -113,4 +211,3 @@ The process works as follows:
 ## License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
-# TiktokVideoAutomation

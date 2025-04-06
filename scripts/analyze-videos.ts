@@ -1,5 +1,5 @@
 import { analyzeColors } from "../modules/analysis/analyze-colors";
-import { VideoData, VideoAnalysis } from "../modules/data/types";
+import { VideoAnalysis } from "../modules/data/types";
 import {
   loadVideosJson,
   loadAnalysisJson,
@@ -9,10 +9,12 @@ import {
 async function main() {
   const videos = loadVideosJson();
   const analysisData = loadAnalysisJson();
-  const analyzedIds = new Set(Object.keys(analysisData).map(Number));
 
   const notAnalyzedVideos = videos.filter(
-    (video) => !analyzedIds.has(video.id)
+    (video) =>
+      !analysisData[video.id] ||
+      (analysisData[video.id].brightness &&
+        analysisData[video.id].dominantColor)
   );
 
   console.log(`Анализируем ${notAnalyzedVideos.length} видео...`);
@@ -27,7 +29,9 @@ async function main() {
     }
 
     try {
-      const imageUrls = video.video_pictures.map((pic) => pic.picture);
+      const imageUrls = video.video_pictures
+        .map((pic) => pic.picture)
+        .slice(0, 1);
 
       const analysis = await analyzeColors(imageUrls);
 

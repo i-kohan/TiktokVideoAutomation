@@ -217,7 +217,7 @@ async function main() {
   });
 
   console.log(
-    "\nClustering complete! Run 'npx ts-node scripts/montage-from-cluster.ts' to create montages"
+    "\nClustering complete! Run 'npx ts-node scripts/montage-cluster.ts' to create montages"
   );
 }
 

@@ -2,9 +2,9 @@ import { VideoData } from "../modules/data/types";
 import { loadVideosJson, saveVideosJson } from "../modules/data/videos";
 import { searchVideos } from "../modules/pexels/search";
 
-const query = "forest fog sun";
+const query = "forest drone";
 const videosCount = 80;
-const page = 1;
+const page = 7;
 
 async function main() {
   const existingVideos = loadVideosJson();

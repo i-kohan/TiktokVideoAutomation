@@ -142,7 +142,7 @@ async function main() {
   console.log(`\nCluster saved as ${orientation} cluster #${clusterIndex}`);
   console.log(`To create a montage from this cluster, run:`);
   console.log(
-    `npx ts-node scripts/montage-from-cluster.ts ${clusterIndex} ${orientation}`
+    `npx ts-node scripts/montage-cluster.ts ${clusterIndex} ${orientation}`
   );
 }
 
