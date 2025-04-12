@@ -178,7 +178,7 @@ npx ts-node scripts/search-videos.ts "foggy mountain landscape"
 Create montages directly from a search query:
 
 ```bash
-npx ts-node scripts/montage-from-query.ts "forest with sunlight" portrait
+npx ts-node scripts/montage-cluster.ts "forest with sunlight" portrait
 ```
 
 ## Example Searches

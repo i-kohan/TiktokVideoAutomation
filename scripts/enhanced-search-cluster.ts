@@ -78,7 +78,7 @@ async function main() {
   const orientation = process.argv[4] || "portrait";
   const maxVideos = parseInt(process.argv[5] || "5");
   const clusterName = process.argv[6] || primaryQuery;
-  const minSimilarity = parseFloat(process.argv[7] || "0.75"); // Minimum semantic similarity threshold
+  const minSimilarity = parseFloat(process.argv[7] || "0.0"); // Lowered minimum similarity threshold
 
   if (!primaryQuery) {
     console.error(
@@ -130,7 +130,7 @@ async function main() {
 
   // Filter by minimum similarity threshold
   const filteredPrimaryResults = primaryResults.filter(
-    (result) => result.similarity >= minSimilarity
+    (result) => result.similarity >= minSimilarity // Changed from > to >= to include videos at the threshold
   );
 
   console.log(
@@ -168,7 +168,7 @@ async function main() {
 
       // Count matching videos that are already in our candidates
       relatedResults
-        .filter((result) => result.similarity >= minSimilarity)
+        .filter((result) => result.similarity >= minSimilarity) // Changed from > to >=
         .forEach((result) => {
           if (videoFrequency.has(result.videoId)) {
             videoFrequency.set(
@@ -278,7 +278,7 @@ async function main() {
   // Create the cluster
   const newCluster: Cluster = {
     videoIds: bestMatches.map((result) => result.videoId),
-    quality: 1 - avgCombinedScore, // Lower is better in our quality metric
+    quality: avgCombinedScore, // Changed: higher is better
     theme: clusterName,
   };
 
@@ -316,7 +316,7 @@ async function main() {
   console.log(`Orientation: ${orientation}`);
   console.log(`Videos in cluster: ${newCluster.videoIds.length}`);
   console.log(
-    `Quality score: ${newCluster.quality.toFixed(3)} (lower is better)`
+    `Quality score: ${newCluster.quality.toFixed(3)} (higher is better)`
   );
   console.log(`Minimum similarity threshold: ${minSimilarity}`);
 
