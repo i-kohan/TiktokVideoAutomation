@@ -3,7 +3,7 @@ import { exec } from "child_process";
 import { promisify } from "util";
 import path from "path";
 import fs from "fs/promises";
-import { SearchParams, SearchResponse } from "@/types";
+import type { SearchParams, VideoData } from "../../../types";
 
 const execAsync = promisify(exec);
 
@@ -42,12 +42,12 @@ export async function POST(request: NextRequest) {
       "enhanced-search-cluster.ts"
     );
 
-    // Build the command
-    const command = `cd ${BASE_PATH} && npx ts-node ${scriptPath} "${
-      params.primaryQuery
-    }" "${relatedPromptsArg}" ${params.orientation} ${
-      params.maxVideos || 10
-    } "temp-search" ${params.minSimilarity || 0.3}`;
+    // Build the command with proper type checking
+    const filterHumans = params.filterHumans ?? true; // Default to true if not specified
+    const maxVideos = params.maxVideos ?? 20;
+    const minSimilarity = params.minSimilarity ?? 0.0;
+
+    const command = `cd ${BASE_PATH} && npx ts-node ${scriptPath} "${params.primaryQuery}" "${relatedPromptsArg}" ${params.orientation} ${maxVideos} "temp-search" ${minSimilarity} ${filterHumans}`;
 
     console.log(`Executing: ${command}`);
 
@@ -96,37 +96,35 @@ export async function POST(request: NextRequest) {
     console.log("Command output:", commandOutput);
 
     // Map the cluster results to the format expected by the UI
-    const results = latestCluster.videoIds.map(
-      (videoId: number, index: number) => {
-        // Find the video in the videos array
-        const video = videos.find((v: any) => v.id === videoId);
+    const results = latestCluster.videoIds.map((videoId: number) => {
+      // Find the video in the videos array
+      const video = videos.find((v: VideoData) => v.id === videoId);
 
-        // Look for the similarity in the command output
-        // This is a bit of a hack, but it works for now
-        const semanticScoreMatch = commandOutput.match(
-          new RegExp(`Video ${videoId}.*?Semantic Score: (0\\.\\d+)`, "s")
-        );
-        const combinedScoreMatch = commandOutput.match(
-          new RegExp(`Video ${videoId}.*?Combined Score: (0\\.\\d+)`, "s")
-        );
+      // Look for the similarity in the command output
+      // This is a bit of a hack, but it works for now
+      const semanticScoreMatch = commandOutput.match(
+        new RegExp(`Video ${videoId}.*?Semantic Score: (0\\.\\d+)`, "s")
+      );
+      const combinedScoreMatch = commandOutput.match(
+        new RegExp(`Video ${videoId}.*?Combined Score: (0\\.\\d+)`, "s")
+      );
 
-        const semanticScore = semanticScoreMatch
-          ? parseFloat(semanticScoreMatch[1])
-          : 0;
-        const combinedScore = combinedScoreMatch
-          ? parseFloat(combinedScoreMatch[1])
-          : 0;
+      const semanticScore = semanticScoreMatch
+        ? parseFloat(semanticScoreMatch[1])
+        : 0;
+      const combinedScore = combinedScoreMatch
+        ? parseFloat(combinedScoreMatch[1])
+        : 0;
 
-        return {
-          videoId,
-          similarity: semanticScore,
-          semanticScore,
-          combinedScore,
-          video,
-          analysis: analysis[videoId],
-        };
-      }
-    );
+      return {
+        videoId,
+        similarity: semanticScore,
+        semanticScore,
+        combinedScore,
+        video,
+        analysis: analysis[videoId],
+      };
+    });
 
     return NextResponse.json({
       results,

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { SearchParams } from "@/types";
+import type { SearchParams } from "../types";
 
 interface SearchFormProps {
   onSearch: (params: SearchParams) => void;
@@ -13,8 +13,9 @@ export default function SearchForm({ onSearch, isLoading }: SearchFormProps) {
     primaryQuery: "",
     relatedPrompts: "",
     orientation: "portrait",
-    maxVideos: 10,
-    minSimilarity: 0.3,
+    maxVideos: 20,
+    minSimilarity: 0.0,
+    filterHumans: true,
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -27,18 +28,24 @@ export default function SearchForm({ onSearch, isLoading }: SearchFormProps) {
       HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
     >
   ) => {
-    const { name, value } = e.target;
+    const { name, value, type } = e.target;
 
     if (name === "maxVideos" || name === "minSimilarity") {
-      setParams({
-        ...params,
+      setParams((prev) => ({
+        ...prev,
         [name]: parseFloat(value),
-      });
+      }));
+    } else if (type === "checkbox") {
+      const target = e.target as HTMLInputElement;
+      setParams((prev) => ({
+        ...prev,
+        [name]: target.checked,
+      }));
     } else {
-      setParams({
-        ...params,
+      setParams((prev) => ({
+        ...prev,
         [name]: value,
-      });
+      }));
     }
   };
 
@@ -121,7 +128,7 @@ export default function SearchForm({ onSearch, isLoading }: SearchFormProps) {
             value={params.maxVideos}
             onChange={handleChange}
             min="2"
-            max="20"
+            max="100"
             className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
           />
         </div>
@@ -139,12 +146,34 @@ export default function SearchForm({ onSearch, isLoading }: SearchFormProps) {
             name="minSimilarity"
             value={params.minSimilarity}
             onChange={handleChange}
-            min="0.1"
-            max="0.9"
-            step="0.05"
+            min="0.0"
+            max="1.0"
+            step="0.01"
             className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
           />
+          <p className="mt-1 text-xs text-gray-500">
+            Minimum similarity score (0.0 to 1.0). 1.0 means perfect match, 0.0
+            means no similarity. Try lower values (0.1-0.3) if you&apos;re not
+            getting results with higher values.
+          </p>
         </div>
+      </div>
+
+      <div className="flex items-center">
+        <input
+          type="checkbox"
+          id="filterHumans"
+          name="filterHumans"
+          checked={params.filterHumans}
+          onChange={handleChange}
+          className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+        />
+        <label
+          htmlFor="filterHumans"
+          className="ml-2 block text-sm text-gray-900"
+        >
+          Filter out videos with humans
+        </label>
       </div>
 
       <div>

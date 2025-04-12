@@ -76,19 +76,20 @@ async function main() {
   const primaryQuery = process.argv[2];
   const relatedPrompts = process.argv[3] ? process.argv[3].split(",") : [];
   const orientation = process.argv[4] || "portrait";
-  const maxVideos = parseInt(process.argv[5] || "5");
+  const maxVideos = parseInt(process.argv[5] || "20");
   const clusterName = process.argv[6] || primaryQuery;
-  const minSimilarity = parseFloat(process.argv[7] || "0.0"); // Lowered minimum similarity threshold
+  const minSimilarity = parseFloat(process.argv[7] || "0.0");
+  const filterHumans = process.argv[8] === "true";
 
   if (!primaryQuery) {
     console.error(
       "Please provide a primary search query as the first argument"
     );
     console.error(
-      "Usage: npx ts-node scripts/enhanced-search-cluster.ts 'primary query' 'related1,related2' [orientation] [max videos] [cluster name] [min similarity]"
+      "Usage: npx ts-node scripts/enhanced-search-cluster.ts 'primary query' 'related1,related2' [orientation] [max videos] [cluster name] [min similarity] [filter humans]"
     );
     console.error(
-      "Example: npx ts-node scripts/enhanced-search-cluster.ts 'forest fog' 'misty woods,morning fog' portrait 5 'Foggy Forest' 0.8"
+      "Example: npx ts-node scripts/enhanced-search-cluster.ts 'forest fog' 'misty woods,morning fog' portrait 20 'Foggy Forest' 0.0 true"
     );
     process.exit(1);
   }
@@ -124,8 +125,8 @@ async function main() {
   const primaryResults = await searchVideosByText(
     primaryQuery,
     analysisData,
-    true,
-    50
+    filterHumans,
+    maxVideos * 2 // Search for more videos to allow for filtering
   );
 
   // Filter by minimum similarity threshold
@@ -162,8 +163,8 @@ async function main() {
       const relatedResults = await searchVideosByText(
         prompt,
         analysisData,
-        true,
-        30
+        filterHumans,
+        maxVideos
       );
 
       // Count matching videos that are already in our candidates
